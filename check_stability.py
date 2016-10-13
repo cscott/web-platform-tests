@@ -44,6 +44,7 @@ class Chrome(object):
             "product": "chrome",
             "binary": "%s/chrome-linux/chrome" % root,
             "webdriver_binary": "%s/chromedriver" % root,
+            "test_types": ["testharness", "reftest"]
         }
 
 

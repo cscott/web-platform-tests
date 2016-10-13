@@ -1,7 +1,25 @@
-set -ex
+set -e
 
 export BUILD_HOME=$HOME/build
 export WPT_HOME=$BUILD_HOME/w3c/web-platform-tests
+
+hosts_fixup() {
+    echo "== /etc/hosts =="
+    cat /etc/hosts
+    echo "----------------"
+    sudo sed -i 's/^::1\s*localhost/::1/' /etc/hosts
+    sudo sh -c 'echo "
+127.0.0.1 web-platform.test
+127.0.0.1 www.web-platform.test
+127.0.0.1 www1.web-platform.test
+127.0.0.1 www2.web-platform.test
+127.0.0.1 xn--n8j6ds53lwwkrqhv28a.web-platform.test
+127.0.0.1 xn--lve-6lad.web-platform.test
+" >> /etc/hosts'
+    echo "== /etc/hosts =="
+    cat /etc/hosts
+    echo "----------------"
+}
 
 fetch_master() {
     cd $WPT_HOME
@@ -51,7 +69,8 @@ install_geckodriver() {
 data = json.load(sys.stdin)
 print (item["browser_download_url"] for item in data["assets"]
        if "linux64" in item["browser_download_url"]).next()' > "$tmpfile"
-    release_data=$(curl -s https://api.github.com/repos/mozilla/geckodriver/releases/latest)
+    release_data=$(curl -s https://api.github.com/repos/mozilla/geckodriver/releases/latest?access_token=$GH_TOKEN)
+    echo $RELEASE_DATA
     release_url=$(echo $release_data | python $tmpfile)
     rm "$tmpfile"
     wget "$release_url"
@@ -90,6 +109,7 @@ main() {
         install_geckodriver
         ;;
     chrome)
+        hosts_fixup
         install_chrome
         install_chromedriver
         ;;
